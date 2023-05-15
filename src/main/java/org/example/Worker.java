@@ -15,13 +15,15 @@ public class Worker extends Thread {
     public static AtomicBoolean killed = new AtomicBoolean(false);
     protected final static URI endpoint = URI.create("http://127.0.0.1:8050");
     protected final static String tableName = "test.rand";
+    protected final static int tableSize = 1000;
+    protected final static boolean consistentRead = false;
 
     protected GetItemRequest randRequest() {
         HashMap<String, AttributeValue> keyToGet = new HashMap<String, AttributeValue>();
-        keyToGet.put("id", AttributeValue.builder().n(String.valueOf(rand.nextInt(1000))).build());
+        keyToGet.put("id", AttributeValue.builder().n(String.valueOf(rand.nextInt(tableSize))).build());
         GetItemRequest request = GetItemRequest.builder()
                 .key(keyToGet)
-                .tableName(tableName)
+                .tableName(tableName).consistentRead(consistentRead)
                 .build();
         return request;
     }
