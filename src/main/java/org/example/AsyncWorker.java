@@ -21,21 +21,22 @@ public class AsyncWorker extends Worker {
             .httpClientBuilder(NettyNioAsyncHttpClient.builder()
                     .eventLoopGroupBuilder(SdkEventLoopGroup.builder().numberOfThreads(8)))
             .build();
-    private ReentrantLock mu = new ReentrantLock();
-    private Condition cv = mu.newCondition();
-    private int inflight = 0;
-    private final int maxInflight;
+    // private ReentrantLock mu = new ReentrantLock();
+    // private Condition cv = mu.newCondition();
+    // private int inflight = 0;
+    // private final int maxInflight;
 
     AsyncWorker(int maxf) {
-        maxInflight = maxf;
+        // maxInflight = maxf;
     }
 
     public void run() {
         while (!killed.get()) {
-            mu.lock();
-            inflight++;
-            mu.unlock();
+            // mu.lock();
+            // inflight++;
+            // mu.unlock();
 
+            sendCount.incrementAndGet();
             GetItemRequest request = randRequest();
             CompletableFuture<GetItemResponse> fut = client.getItem(request);
             fut.whenComplete((resp, err) -> {
@@ -50,33 +51,33 @@ public class AsyncWorker extends Worker {
                     System.err.println(e.getMessage());
                     killed.set(true);
                 } finally {
-                    mu.lock();
-                    inflight--;
-                    cv.signal();
-                    mu.unlock();
+                    // mu.lock();
+                    // inflight--;
+                    // cv.signal();
+                    // mu.unlock();
                 }
             });
 
-            mu.lock();
-            try {
-                if (inflight == maxInflight) {
-                    cv.await();
-                }
-            } catch (InterruptedException excetion) {
-                Thread.currentThread().interrupt(); // set interrupted flag
-            } finally {
-                mu.unlock();
-            }
+            // mu.lock();
+            // try {
+            // if (inflight == maxInflight) {
+            // cv.await();
+            // }
+            // } catch (InterruptedException excetion) {
+            // Thread.currentThread().interrupt(); // set interrupted flag
+            // } finally {
+            // mu.unlock();
+            // }
         }
-        mu.lock();
-        try {
-            while (inflight > 0) {
-                cv.await();
-            }
-        } catch (InterruptedException excetion) {
-            Thread.currentThread().interrupt();
-        } finally {
-            mu.unlock();
-        }
+        // mu.lock();
+        // try {
+        // while (inflight > 0) {
+        // cv.await();
+        // }
+        // } catch (InterruptedException excetion) {
+        // Thread.currentThread().interrupt();
+        // } finally {
+        // mu.unlock();
+        // }
     }
 }

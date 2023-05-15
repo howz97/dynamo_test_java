@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 public class Worker extends Thread {
     protected static Random rand = new Random();
+    public static AtomicInteger sendCount = new AtomicInteger(0);
     public static AtomicInteger count = new AtomicInteger(0);
     public static AtomicBoolean killed = new AtomicBoolean(false);
     protected final static URI endpoint = URI.create("http://127.0.0.1:8050");

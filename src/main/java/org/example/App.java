@@ -8,7 +8,7 @@ import java.util.Vector;
 public class App {
     private static final Logger logger = LoggerFactory.getLogger(App.class);
     private static final int run_seconds = 30;
-    private static final int report_interval = 5;
+    private static final int report_interval = 1;
 
     public static void main(String... args) {
         String cmd = args[0];
@@ -37,6 +37,8 @@ public class App {
                 Thread.sleep(report_interval * 1000);
                 int qps = (Worker.count.get() - last_v) / report_interval;
                 logger.info("qps {}", qps);
+                logger.info("sendCount {}", Worker.sendCount.get());
+                logger.info("respCount {}", Worker.count.get());
                 last_v = Worker.count.get();
             }
             Worker.killed.set(true);
