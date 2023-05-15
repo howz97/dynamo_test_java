@@ -5,6 +5,8 @@ import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.core.client.config.SdkAdvancedAsyncClientOption;
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
+import software.amazon.awssdk.http.nio.netty.SdkEventLoopGroup;
 import software.amazon.awssdk.regions.Region;
 
 import java.util.concurrent.CompletableFuture;
@@ -16,6 +18,8 @@ public class AsyncWorker extends Worker {
             .region(Region.AP_NORTHEAST_1).endpointOverride(endpoint).asyncConfiguration(
                     b -> b.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR,
                             Runnable::run))
+            .httpClientBuilder(NettyNioAsyncHttpClient.builder()
+                    .eventLoopGroupBuilder(SdkEventLoopGroup.builder().numberOfThreads(8)))
             .build();
     private ReentrantLock mu = new ReentrantLock();
     private Condition cv = mu.newCondition();

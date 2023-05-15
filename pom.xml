@@ -94,6 +94,11 @@
             <version>${junit5.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>netty-nio-client</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
