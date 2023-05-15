@@ -4,29 +4,21 @@ import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
-import software.amazon.awssdk.core.client.config.SdkAdvancedAsyncClientOption;
-import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
-import software.amazon.awssdk.http.nio.netty.SdkEventLoopGroup;
-import software.amazon.awssdk.regions.Region;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
 
 public class AsyncWorker extends Worker {
-    private final static DynamoDbAsyncClient client = DynamoDbAsyncClient.builder()
-            .region(Region.AP_NORTHEAST_1).endpointOverride(endpoint).asyncConfiguration(
-                    b -> b.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR,
-                            Runnable::run))
-            .httpClientBuilder(NettyNioAsyncHttpClient.builder()
-                    .eventLoopGroupBuilder(SdkEventLoopGroup.builder().numberOfThreads(8)))
-            .build();
+    public static DynamoDbAsyncClient clients[];
+    private DynamoDbAsyncClient client;
     private ReentrantLock mu = new ReentrantLock();
     private Condition cv = mu.newCondition();
     private int inflight = 0;
     private final int maxInflight;
 
-    AsyncWorker(int maxf) {
+    AsyncWorker(int id, int maxf) {
+        client = clients[id % clients.length];
         maxInflight = maxf;
     }
 
