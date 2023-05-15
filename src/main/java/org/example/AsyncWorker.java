@@ -8,8 +8,7 @@ import software.amazon.awssdk.core.client.config.SdkAdvancedAsyncClientOption;
 import software.amazon.awssdk.regions.Region;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.Condition;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncWorker extends Worker {
     private final static DynamoDbAsyncClient client = DynamoDbAsyncClient.builder()
@@ -17,9 +16,7 @@ public class AsyncWorker extends Worker {
                     b -> b.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR,
                             Runnable::run))
             .build();
-    private ReentrantLock mu = new ReentrantLock();
-    private Condition cv = mu.newCondition();
-    private int inflight = 0;
+    private AtomicInteger inflight = new AtomicInteger(0);
     private final int maxInflight;
 
     AsyncWorker(int maxf) {
@@ -28,9 +25,7 @@ public class AsyncWorker extends Worker {
 
     public void run() {
         while (!killed.get()) {
-            mu.lock();
-            inflight++;
-            mu.unlock();
+            inflight.incrementAndGet();
 
             GetItemRequest request = randRequest();
             CompletableFuture<GetItemResponse> fut = client.getItem(request);
@@ -46,33 +41,14 @@ public class AsyncWorker extends Worker {
                     System.err.println(e.getMessage());
                     killed.set(true);
                 } finally {
-                    mu.lock();
-                    inflight--;
-                    cv.signal();
-                    mu.unlock();
+                    inflight.decrementAndGet();
                 }
             });
 
-            mu.lock();
-            try {
-                if (inflight == maxInflight) {
-                    cv.await();
-                }
-            } catch (InterruptedException excetion) {
-                Thread.currentThread().interrupt(); // set interrupted flag
-            } finally {
-                mu.unlock();
+            while (inflight.get() == maxInflight) {
             }
         }
-        mu.lock();
-        try {
-            while (inflight > 0) {
-                cv.await();
-            }
-        } catch (InterruptedException excetion) {
-            Thread.currentThread().interrupt();
-        } finally {
-            mu.unlock();
+        while (inflight.get() > 0) {
         }
     }
 }
