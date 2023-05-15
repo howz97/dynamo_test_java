@@ -11,8 +11,6 @@ public class App {
     private static final int report_interval = 5;
 
     public static void main(String... args) {
-        logger.info("Application starts");
-
         String cmd = args[0];
         int num_thds = Integer.parseInt(args[1]);
         Vector<Worker> workers = new Vector<Worker>(num_thds);
@@ -51,7 +49,6 @@ public class App {
             logger.error("error {}", e);
         }
 
-        logger.info("Application ends");
         System.exit(0);
     }
 }

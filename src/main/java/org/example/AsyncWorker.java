@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
 
 public class AsyncWorker extends Worker {
-    private final DynamoDbAsyncClient client = DynamoDbAsyncClient.builder()
+    private final static DynamoDbAsyncClient client = DynamoDbAsyncClient.builder()
             .region(Region.AP_NORTHEAST_1).endpointOverride(endpoint).asyncConfiguration(
                     b -> b.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR,
                             Runnable::run))
