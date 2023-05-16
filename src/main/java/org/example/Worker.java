@@ -17,7 +17,7 @@ public class Worker extends Thread {
     private static final int test_size = 900000;
     private static final int report_interval = 100000;
     private static AtomicInteger counter = new AtomicInteger(0);
-    private static AtomicLong last_report_ts = new AtomicLong(System.currentTimeMillis());
+    private static AtomicLong last_report_ts;
     protected static AtomicBoolean killed = new AtomicBoolean(false);
     protected final static URI endpoint = URI.create("http://127.0.0.1:8050");
     private final static String tableName = "test.rand";
@@ -58,5 +58,9 @@ public class Worker extends Thread {
 
     public static void initBarrier(int num_thds) {
         barrier = new CyclicBarrier(num_thds + 1);
+    }
+
+    public static void setStartTs() {
+        last_report_ts = new AtomicLong(System.currentTimeMillis());
     }
 }

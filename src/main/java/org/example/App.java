@@ -33,6 +33,8 @@ public class App {
             System.exit(1);
         }
         try {
+            logger.info("test started ...");
+            Worker.setStartTs();
             Worker.barrier.await();
             for (Worker w : workers) {
                 w.join();
