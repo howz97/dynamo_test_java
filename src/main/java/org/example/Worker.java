@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Random;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -13,8 +14,8 @@ import java.net.URI;
 import java.util.HashMap;
 
 public class Worker extends Thread {
-    private static final int test_size = 100000;
-    private static final int report_interval = 10000;
+    private static final int test_size = 900000;
+    private static final int report_interval = 100000;
     private static AtomicInteger counter = new AtomicInteger(0);
     private static AtomicLong last_report_ts = new AtomicLong(System.currentTimeMillis());
     protected static AtomicBoolean killed = new AtomicBoolean(false);
@@ -24,6 +25,7 @@ public class Worker extends Thread {
     private final static boolean consistentRead = false;
     private static Random rand = new Random();
     private static final Logger logger = LoggerFactory.getLogger(Worker.class);
+    public static CyclicBarrier barrier;
 
     protected GetItemRequest randRequest() {
         HashMap<String, AttributeValue> keyToGet = new HashMap<String, AttributeValue>();
@@ -52,5 +54,9 @@ public class Worker extends Thread {
 
     protected boolean exited() {
         return counter.get() >= test_size || killed.get();
+    }
+
+    public static void initBarrier(int num_thds) {
+        barrier = new CyclicBarrier(num_thds + 1);
     }
 }

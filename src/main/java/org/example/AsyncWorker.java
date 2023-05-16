@@ -9,13 +9,14 @@ import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.http.nio.netty.SdkEventLoopGroup;
 import software.amazon.awssdk.regions.Region;
 
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
 
 public class AsyncWorker extends Worker {
     private static final int num_clients = 2;
-    private static final int pool_size = 2;
+    private static final int pool_size = 3;
     private static DynamoDbAsyncClient clients[];
     private DynamoDbAsyncClient client;
     private ReentrantLock mu = new ReentrantLock();
@@ -29,6 +30,13 @@ public class AsyncWorker extends Worker {
     }
 
     public void run() {
+        try {
+            barrier.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
+            e.printStackTrace();
+            return;
+        }
+
         while (!exited()) {
             mu.lock();
             inflight++;
@@ -62,6 +70,7 @@ public class AsyncWorker extends Worker {
                 mu.unlock();
             }
         }
+
         mu.lock();
         try {
             while (inflight > 0) {
@@ -78,7 +87,7 @@ public class AsyncWorker extends Worker {
         AsyncWorker.clients = new DynamoDbAsyncClient[num_clients];
         for (int i = 0; i < num_clients; ++i) {
             AsyncWorker.clients[i] = DynamoDbAsyncClient.builder()
-                    .region(Region.AP_NORTHEAST_1).endpointOverride(Worker.endpoint).asyncConfiguration(
+                    .region(Region.AP_NORTHEAST_1).asyncConfiguration(
                             b -> b.advancedOption(SdkAdvancedAsyncClientOption.FUTURE_COMPLETION_EXECUTOR,
                                     Runnable::run))
                     .httpClientBuilder(NettyNioAsyncHttpClient.builder()

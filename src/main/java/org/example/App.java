@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Vector;
+import java.util.concurrent.BrokenBarrierException;
 
 public class App {
     private static final Logger logger = LoggerFactory.getLogger(App.class);
@@ -12,6 +13,7 @@ public class App {
         String cmd = args[0];
         int num_thds = Integer.parseInt(args[1]);
         Vector<Worker> workers = new Vector<Worker>(num_thds);
+        Worker.initBarrier(num_thds);
         if (cmd.equals("sync")) {
             for (int i = 0; i < num_thds; ++i) {
                 SyncWorker w = new SyncWorker();
@@ -31,11 +33,14 @@ public class App {
             System.exit(1);
         }
         try {
+            Worker.barrier.await();
             for (Worker w : workers) {
                 w.join();
             }
         } catch (InterruptedException e) {
-            logger.error("error {}", e);
+            e.printStackTrace();
+        } catch (BrokenBarrierException e) {
+            e.printStackTrace();
         }
 
         System.exit(0);
