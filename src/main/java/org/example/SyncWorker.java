@@ -12,6 +12,11 @@ public class SyncWorker extends Worker {
     private final DynamoDbClient client = DynamoDbClient.builder()
             .region(Region.AP_NORTHEAST_1)
             .build();
+    private int task_left;
+
+    SyncWorker(int tasks) {
+        task_left = tasks;
+    }
 
     public void run() {
         try {
@@ -21,12 +26,13 @@ public class SyncWorker extends Worker {
             return;
         }
 
-        while (!exited()) {
+        while (!exited() && task_left > 0) {
             GetItemRequest request = randRequest();
             try {
                 GetItemResponse resp = client.getItem(request);
                 assert (resp.hasItem());
                 updateCounter();
+                task_left--;
             } catch (DynamoDbException e) {
                 System.err.println(e.getMessage());
                 killed.set(true);

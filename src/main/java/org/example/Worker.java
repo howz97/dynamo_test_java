@@ -14,7 +14,7 @@ import java.net.URI;
 import java.util.HashMap;
 
 public class Worker extends Thread {
-    private static final int test_size = 900000;
+    public static final int test_size = 1000000;
     private static final int report_interval = 100000;
     private static AtomicInteger counter = new AtomicInteger(0);
     private static AtomicLong last_report_ts;

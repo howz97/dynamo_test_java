@@ -15,16 +15,17 @@ public class App {
         Vector<Worker> workers = new Vector<Worker>(num_thds);
         Worker.initBarrier(num_thds);
         if (cmd.equals("sync")) {
+            int tasks_size = (Worker.test_size / num_thds) + 1;
             for (int i = 0; i < num_thds; ++i) {
-                SyncWorker w = new SyncWorker();
+                SyncWorker w = new SyncWorker(tasks_size);
                 w.start();
                 workers.add(w);
             }
         } else if (cmd.equals("async")) {
-            int req_per_thd = Integer.parseInt(args[2]);
+            int maxf = Integer.parseInt(args[2]);
             AsyncWorker.InitClients();
             for (int i = 0; i < num_thds; ++i) {
-                AsyncWorker w = new AsyncWorker(i, req_per_thd);
+                AsyncWorker w = new AsyncWorker(i, maxf);
                 w.start();
                 workers.add(w);
             }
