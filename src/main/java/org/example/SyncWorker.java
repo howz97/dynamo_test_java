@@ -13,24 +13,16 @@ public class SyncWorker extends Worker {
             .build();
 
     public void run() {
-        while (!killed.get()) {
-            getRandItem();
-        }
-    }
-
-    public void getRandItem() {
-        GetItemRequest request = randRequest();
-        try {
-            GetItemResponse resp = client.getItem(request);
-            if (resp.hasItem()) {
-                count.incrementAndGet();
-            } else {
-                System.err.println("item not exists");
+        while (!exited()) {
+            GetItemRequest request = randRequest();
+            try {
+                GetItemResponse resp = client.getItem(request);
+                assert (resp.hasItem());
+                updateCounter();
+            } catch (DynamoDbException e) {
+                System.err.println(e.getMessage());
                 killed.set(true);
             }
-        } catch (DynamoDbException e) {
-            System.err.println(e.getMessage());
-            killed.set(true);
         }
     }
 }
