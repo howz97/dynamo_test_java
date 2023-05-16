@@ -27,9 +27,11 @@ public class SyncWorker extends Worker {
         }
 
         while (!exited() && task_left > 0) {
-            GetItemRequest request = randRequest();
             try {
+                GetItemRequest request = randRequest();
+                long start = System.currentTimeMillis();
                 GetItemResponse resp = client.getItem(request);
+                stat.Record((int) (System.currentTimeMillis() - start));
                 assert (resp.hasItem());
                 updateCounter();
                 task_left--;

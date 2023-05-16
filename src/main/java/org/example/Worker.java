@@ -20,6 +20,7 @@ public class Worker extends Thread {
     private static AtomicLong last_report_ts;
     protected static AtomicBoolean killed = new AtomicBoolean(false);
     protected final static URI endpoint = URI.create("http://127.0.0.1:8050");
+    public static LatencyStat stat = new LatencyStat();
     private final static String tableName = "test.rand";
     private final static int tableSize = 1000;
     private final static boolean consistentRead = false;

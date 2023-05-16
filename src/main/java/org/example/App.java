@@ -34,12 +34,14 @@ public class App {
             System.exit(1);
         }
         try {
-            logger.info("test started ...");
+            logger.info("threads ready...");
             Worker.setStartTs();
             Worker.barrier.await();
             for (Worker w : workers) {
                 w.join();
             }
+            int p95 = Worker.stat.LatencyPercentiles(0.95);
+            logger.info("latency: average={} 95%={}", Worker.stat.AverageLatency(), p95);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (BrokenBarrierException e) {

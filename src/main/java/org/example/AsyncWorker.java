@@ -43,9 +43,11 @@ public class AsyncWorker extends Worker {
             mu.unlock();
 
             GetItemRequest request = randRequest();
+            long start = System.currentTimeMillis();
             CompletableFuture<GetItemResponse> fut = client.getItem(request);
             fut.whenComplete((resp, err) -> {
                 try {
+                    stat.Record((int) (System.currentTimeMillis() - start));
                     assert (resp.hasItem());
                     updateCounter();
                 } catch (DynamoDbException e) {
