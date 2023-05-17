@@ -15,8 +15,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
 
 public class AsyncWorker extends Worker {
-    private static final int num_clients = 2;
-    private static final int pool_size = 3;
+    private static final int num_clients = 3;
+    private static final int pool_size = 2;
     private static DynamoDbAsyncClient clients[];
     private DynamoDbAsyncClient client;
     private ReentrantLock mu = new ReentrantLock();
